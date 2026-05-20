@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Reserva de viajes - Bustraker">
+    <meta name="theme-color" content="#01315f">
+    <title>Viajar - Bustraker</title>
+    <link rel="stylesheet" th:href="@{/css/style_viajar.css}">
+    <link rel="shortcut icon" th:href="@{/images/Bus_icono.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #map { height: 100vh; width: 100%; }
+        .options-panel {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            width: min(340px, calc(100vw - 40px));
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .options-panel h2 {
+            margin: 0 0 15px 0;
+            color: #0d1a3a;
+            font-size: 1.3em;
+            border-bottom: 2px solid #0d1a3a;
+            padding-bottom: 10px;
+        }
+        .options-panel label {
+            display: block;
+            margin: 12px 0 6px 0;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+        .options-panel select,
+        .options-panel input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            box-sizing: border-box;
+        }
+        .options-panel select:disabled,
+        .options-panel input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .options-panel button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #0d1a3a 0%, #1e3a5f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .options-panel button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .btn-primary { background: linear-gradient(135deg, #0d1a3a 0%, #1e3a5f 100%); }
+        .btn-secondary { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
+        .success-message {
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: #e6f7e9;
+            color: #1f6f39;
+            border: 1px solid #a9d9b6;
+            font-weight: 600;
+        }
+        .ruta-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 4px solid #0d1a3a;
+        }
+        .ruta-info h4 { margin: 0 0 8px 0; color: #0d1a3a; }
+        .ruta-info p { margin: 4px 0; font-size: 0.9em; }
+        .badge {
+            display: inline-block;
+            background: #0d1a3a;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .bus-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #27ae60;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .bus-card:hover {
+            background: #e8f5e9;
+            transform: translateX(5px);
+        }
+        .bus-card.selected {
+            background: #c8e6c9;
+            border-left-color: #1b5e20;
+        }
+        .bus-card h4 { margin: 0 0 5px 0; color: #27ae60; }
+        .bus-card p { margin: 3px 0; font-size: 0.85em; color: #555; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="options-panel">
+        <h2><i class="fas fa-bus"></i> Planear Viaje</h2>
+        <div th:if="${mensaje}" class="success-message" th:text="${mensaje}"></div>
+        
+        <label for="origen"><i class="fas fa-map-marker-alt"></i> 1. ¿En qué barrio estás?</label>
+        <select id="origen" onchange="actualizarDestinosDisponibles()">
+            <option value="">Selecciona tu barrio actual</option>
+        </select>
+        
+        <button onclick="usarUbicacionActual()" class="btn-secondary" style="margin: 8px 0;">
+            <i class="fas fa-location-arrow"></i> Detectar Mi Ubicación
+        </button>
+        
+        <label for="destino"><i class="fas fa-map-pin"></i> 2. ¿A qué barrio vas?</label>
+        <select id="destino" onchange="buscarBusesDisponibles()" disabled>
+            <option value="">Primero selecciona tu barrio de origen</option>
+        </select>
+        
+        <label for="bus"><i class="fas fa-bus"></i> 3. Buses Disponibles:</label>
+        <div id="busList" style="max-height: 200px; overflow-y: auto;">
+            <p style="color: #757575; font-size: 0.9em; text-align: center; padding: 20px;">
+                Selecciona origen y destino para ver los buses
+            </p>
+        </div>
+        
+        <button onclick="mostrarRutaEnMapa()" id="btnMostrarRuta" disabled class="btn-secondary" style="margin-top: 15px;">
+            <i class="fas fa-map-marked-alt"></i> Mostrar Ruta en Mapa
+        </button>
+        
+        <div id="rutaInfo" class="ruta-info" style="display: none;">
+            <h4><i class="fas fa-info-circle"></i> Ruta del Bus</h4>
+            <p><strong>Bus:</strong> <span id="infoBus"></span></p>
+            <p><strong>Ruta:</strong> <span id="infoRuta"></span></p>
+            <p><strong>Barrios:</strong> <span id="infoBarrios"></span></p>
+        </div>
+        
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+        
+        <label for="fecha"><i class="fas fa-calendar-alt"></i> Fecha:</label>
+        <input type="date" id="fecha">
+        
+        <label for="hora"><i class="fas fa-clock"></i> Hora:</label>
+        <input type="time" id="hora">
+        
+        <label for="pasajeros"><i class="fas fa-users"></i> Pasajeros:</label>
+        <input type="number" id="pasajeros" min="1" max="10" value="1">
+
+        <form id="reservaForm" th:action="@{/viajar}" method="post" style="display: none;">
+            <input type="hidden" name="origen" id="inputOrigen">
+            <input type="hidden" name="destino" id="inputDestino">
+            <input type="hidden" name="busPlaca" id="inputBusPlaca">
+            <input type="hidden" name="busRuta" id="inputBusRuta">
+            <input type="hidden" name="fecha" id="inputFecha">
+            <input type="hidden" name="hora" id="inputHora">
+            <input type="hidden" name="pasajeros" id="inputPasajeros">
+        </form>
+        
+        <button type="button" onclick="confirmarReserva()" class="btn-primary">
+            <i class="fas fa-ticket-alt"></i> Reservar Viaje
+        </button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Variables globales
+        var map;
+        var barrios = [];
+        var barriosData = [];
+        var buses = [];
+        var rutas = [];
+        var coordenadasCache = {};
+        var origenMarker = null;
+        var destinoMarker = null;
+        var rutaLine = null;
+        var barrioMarkers = [];
+        var busSeleccionado = null;
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando Bustraker...');
+            
+            // Establecer fecha y hora actual
+            const hoy = new Date();
+            document.getElementById('fecha').value = hoy.toISOString().split('T')[0];
+            document.getElementById('hora').value = hoy.toTimeString().substring(0, 5);
+            
+            // Cargar barrios desde API
+            cargarBarrios();
+            
+            // Cargar buses y rutas desde API
+            cargarBusesYRutas();
+            
+            // Inicializar mapa
+            initMap();
+        });
+
+        // Inicializar mapa de Leaflet
+        function initMap() {
+            map = L.map('map').setView([10.4236, -75.5478], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            console.log('✅ Mapa inicializado');
+        }
+
+        // Cargar lista de barrios desde API
+        async function cargarBarrios() {
+            try {
+                const response = await fetch('/api/barrios/todos');
+                if (response.ok) {
+                    const data = await response.json();
+                    barriosData = data;
+                    barrios = barriosData.map(b => b.nombre);
+                    console.log('✅', barrios.length, 'barrios cargados');
+                    
+                    // Cache de coordenadas para cada barrio
+                    barriosData.forEach(barrio => {
+                        const nombreNorm = normalizarNombre(barrio.nombre);
+                        coordenadasCache[nombreNorm] = {
+                            lat: parseFloat(barrio.latitud),
+                            lng: parseFloat(barrio.longitud)
+                        };
+                    });
+                    
+                    // Llenar select de origen
+                    const origenSelect = document.getElementById('origen');
+                    origenSelect.innerHTML = '<option value="">Selecciona tu barrio actual</option>';
+                    barrios.sort().forEach(barrio => {
+                        const opt = document.createElement('option');
+                        opt.value = barrio;
+                        opt.textContent = barrio.charAt(0).toUpperCase() + barrio.slice(1);
+                        origenSelect.appendChild(opt);
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error cargando barrios:', error);
+            }
+        }
+
+        // Cargar buses y rutas desde API
+        async function cargarBusesYRutas() {
+            try {
+                const [busesRes, rutasRes] = await Promise.all([
+                    fetch('/api/buses'),
+                    fetch('/api/rutas-con-coordenadas')
+                ]);
+                
+                if (busesRes.ok) {
+                    buses = await busesRes.json();
+                    console.log('✅', buses.length, 'buses cargados');
+                } else {
+                    console.warn('⚠️ No se pudo cargar buses: HTTP', busesRes.status);
+                }
+                
+                if (rutasRes.ok) {
+                    rutas = await rutasRes.json();
+                    console.log('✅', rutas.length, 'rutas cargadas');
+                } else {
+                    console.warn('⚠️ No se pudo cargar rutas: HTTP', rutasRes.status);
+                }
+            } catch (error) {
+                console.error('❌ Error cargando buses/rutas:', error);
+            }
+        }
+
+        function normalizarTexto(texto) {
+            return texto.toString().toLowerCase()
+                .trim()
+                .replace(/á/g, 'a')
+                .replace(/é/g, 'e')
+                .replace(/í/g, 'i')
+                .replace(/ó/g, 'o')
+                .replace(/ú/g, 'u')
+                .replace(/ñ/g, 'n');
+        }
+
+        function distanciaHaversine(lat1, lng1, lat2, lng2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function obtenerBarrioMasCercano(lat, lng) {
+            if (!barriosData.length) return null;
+            let mejorBarrio = null;
+            let distanciaMinima = Infinity;
+            barriosData.forEach(barrio => {
+                const latBarrio = parseFloat(barrio.latitud);
+                const lngBarrio = parseFloat(barrio.longitud);
+                if (Number.isNaN(latBarrio) || Number.isNaN(lngBarrio)) return;
+                const distancia = distanciaHaversine(lat, lng, latBarrio, lngBarrio);
+                if (distancia < distanciaMinima) {
+                    distanciaMinima = distancia;
+                    mejorBarrio = barrio;
+                }
+            });
+            return mejorBarrio ? { barrio: mejorBarrio, distancia: distanciaMinima } : null;
+        }
+
+        // Cuando se selecciona el origen, habilitar destino
+        function actualizarDestinosDisponibles() {
+            const origen = document.getElementById('origen').value;
+            const destinoSelect = document.getElementById('destino');
+            const busList = document.getElementById('busList');
+            
+            if (origen) {
+                destinoSelect.disabled = false;
+                destinoSelect.innerHTML = '<option value="">Selecciona tu barrio de destino</option>';
+                
+                barrios.forEach(barrio => {
+                    if (barrio !== origen) {
+                        const opt = document.createElement('option');
+                        opt.value = barrio;
+                        opt.textContent = barrio.charAt(0).toUpperCase() + barrio.slice(1);
+                        destinoSelect.appendChild(opt);
+                    }
+                });
+                
+                // Resetear buses
+                busList.innerHTML = '<p style="color: #757575; font-size: 0.9em; text-align: center; padding: 20px;">Selecciona destino para ver buses</p>';
+                document.getElementById('btnMostrarRuta').disabled = true;
+                document.getElementById('rutaInfo').style.display = 'none';
+                busSeleccionado = null;
+                
+                console.log('✅ Origen seleccionado:', origen);
+            } else {
+                destinoSelect.disabled = true;
+                destinoSelect.innerHTML = '<option value="">Primero selecciona tu barrio de origen</option>';
+            }
+        }
+
+        // Cuando se selecciona destino, buscar buses disponibles
+        function buscarBusesDisponibles() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            const busList = document.getElementById('busList');
+            
+            if (!origen || !destino) {
+                busList.innerHTML = '<p style="color: #757575; font-size: 0.9em; text-align: center; padding: 20px;">Selecciona origen y destino</p>';
+                return;
+            }
+            
+            const origenNorm = normalizarNombre(origen);
+            const destinoNorm = normalizarNombre(destino);
+            
+            const rutasFiltradas = rutas.filter(ruta => {
+                const barriosNorm = ruta.barrios.map(b => normalizarNombre(b));
+                const origenIndex = barriosNorm.indexOf(origenNorm);
+                const destinoIndex = barriosNorm.indexOf(destinoNorm);
+                return origenIndex >= 0 && destinoIndex >= 0 && origenIndex < destinoIndex;
+            });
+            
+            console.log('✅', rutasFiltradas.length, 'rutas válidas encontradas para', origen, '→', destino);
+            
+            if (rutasFiltradas.length === 0) {
+                busList.innerHTML = '<p style="color: #d32f2f; font-size: 0.9em; text-align: center; padding: 20px;">❌ No hay buses disponibles para esta ruta</p>';
+                document.getElementById('btnMostrarRuta').disabled = true;
+                return;
+            }
+            
+            const busesDisponibles = buses.filter(bus => {
+                return rutasFiltradas.some(ruta => ruta.id === bus.rutaId);
+            });
+            
+            console.log('✅', busesDisponibles.length, 'buses disponibles encontrados para las rutas válidas');
+            if (busesDisponibles.length === 0) {
+                busList.innerHTML = '<p style="color: #d32f2f; font-size: 0.9em; text-align: center; padding: 20px;">❌ No hay buses activos asignados a estas rutas</p>';
+                document.getElementById('btnMostrarRuta').disabled = true;
+                return;
+            }
+            
+            busList.innerHTML = '';
+            busesDisponibles.forEach(bus => {
+                const ruta = rutasFiltradas.find(r => r.id === bus.rutaId);
+                const card = document.createElement('div');
+                card.className = 'bus-card';
+                card.onclick = event => seleccionarBus(bus, ruta, event);
+                card.innerHTML = `
+                    <h4><i class="fas fa-bus"></i> ${bus.placa}</h4>
+                    <p><strong>Ruta:</strong> ${ruta.nombre}</p>
+                    <p><strong>Hora:</strong> ${ruta.horaAproximada || 'N/A'}</p>
+                    <p><strong>Conductor:</strong> ${bus.conductor || 'N/A'}</p>
+                `;
+                busList.appendChild(card);
+            });
+        }
+
+        // Seleccionar un bus
+        function seleccionarBus(bus, ruta, event) {
+            // Remover selección previa
+            document.querySelectorAll('.bus-card').forEach(card => card.classList.remove('selected'));
+            
+            // Marcar como seleccionado
+            busSeleccionado = { bus, ruta };
+            event.currentTarget.classList.add('selected');
+            document.getElementById('btnMostrarRuta').disabled = false;
+            
+            console.log('✅ Bus seleccionado:', bus.placa, 'Ruta:', ruta.nombre);
+        }
+
+        // Mostrar ruta en mapa
+        function mostrarRutaEnMapa() {
+            if (!busSeleccionado) {
+                alert('⚠️ Primero selecciona un bus');
+                return;
+            }
+            
+            const { bus, ruta } = busSeleccionado;
+            
+            // Mostrar información
+            document.getElementById('rutaInfo').style.display = 'block';
+            document.getElementById('infoBus').textContent = bus.placa;
+            document.getElementById('infoRuta').textContent = ruta.nombre;
+            document.getElementById('infoBarrios').textContent = ruta.barrios.join(' → ');
+            
+            // Limpiar mapa
+            if (rutaLine) map.removeLayer(rutaLine);
+            barrioMarkers.forEach(m => map.removeLayer(m));
+            barrioMarkers = [];
+            
+            // Dibujar ruta
+            const coordenadasRuta = ruta.coordenadas || ruta.coordenadasBarrios || null;
+            if (coordenadasRuta && (Array.isArray(coordenadasRuta) ? coordenadasRuta.length > 0 : Object.keys(coordenadasRuta).length > 0)) {
+                let latlngs = [];
+                if (Array.isArray(coordenadasRuta)) {
+                    latlngs = coordenadasRuta.map(c => [c.latitud, c.longitud]);
+                } else {
+                    latlngs = ruta.barrios
+                        .map(barrio => {
+                            const key = normalizarNombre(barrio);
+                            const coords = coordenadasRuta[key] || coordenadasRuta[normalizarTexto(barrio)];
+                            return coords ? [coords[0], coords[1]] : null;
+                        })
+                        .filter(Boolean);
+                }
+                if (latlngs.length) {
+                    rutaLine = L.polyline(latlngs, { color: '#27ae60', weight: 5 }).addTo(map);
+                    map.fitBounds(rutaLine.getBounds(), { padding: [50, 50] });
+                }
+
+                // Agregar marcadores de barrios
+                ruta.barrios.forEach(barrio => {
+                    let coords = obtenerCoordenadas(barrio);
+                    if (!coords && coordenadasRuta && !Array.isArray(coordenadasRuta)) {
+                        coords = coordenadasRuta[normalizarNombre(barrio)] || coordenadasRuta[normalizarTexto(barrio)];
+                        if (coords && Array.isArray(coords)) {
+                            coords = { lat: coords[0], lng: coords[1] };
+                        }
+                    }
+                    if (coords) {
+                        const lat = coords.lat !== undefined ? coords.lat : coords[0];
+                        const lng = coords.lng !== undefined ? coords.lng : coords[1];
+                        const marker = L.marker([lat, lng])
+                            .addTo(map)
+                            .bindPopup(`<strong>${barrio}</strong>`);
+                        barrioMarkers.push(marker);
+                    }
+                });
+                
+                console.log('✅ Ruta mostrada en mapa');
+            } else {
+                alert('⚠️ Esta ruta no tiene coordenadas disponibles');
+            }
+        }
+
+        // Funciones auxiliares
+        function normalizarNombre(nombre) {
+            return nombre.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
+        function obtenerCoordenadas(barrio) {
+            return coordenadasCache[normalizarNombre(barrio)] || null;
+        }
+
+        function usarUbicacionActual() {
+            if (!barriosData.length) {
+                alert('⏳ Cargando barrios, por favor espera unos segundos e intenta de nuevo.');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    if (origenMarker) map.removeLayer(origenMarker);
+                    origenMarker = L.marker([lat, lng]).addTo(map)
+                        .bindPopup('📍 Tu ubicación actual')
+                        .openPopup();
+                    
+                    map.setView([lat, lng], 15);
+                    console.log('✅ Ubicación detectada:', lat, lng);
+
+                    const barrioCercano = obtenerBarrioMasCercano(lat, lng);
+                    if (barrioCercano && barrioCercano.distancia <= 3) {
+                        const origenSelect = document.getElementById('origen');
+                        origenSelect.value = barrioCercano.barrio.nombre;
+                        actualizarDestinosDisponibles();
+                        origenMarker.bindPopup('📍 Tu ubicación actual<br><strong>' + barrioCercano.barrio.nombre + '</strong>').openPopup();
+                        alert('📍 Ubicación detectada en ' + barrioCercano.barrio.nombre + '. Origen seleccionado automáticamente.');
+                    } else if (barrioCercano) {
+                        alert('📍 Ubicación detectada cerca de ' + barrioCercano.barrio.nombre + ', pero está fuera del rango de selección automática. Elige tu barrio manualmente.');
+                    } else {
+                        alert('📍 Ubicación detectada. Selecciona tu barrio origen manualmente.');
+                    }
+                }, error => {
+                    alert('❌ No se pudo detectar tu ubicación: ' + error.message);
+                });
+            } else {
+                alert('❌ Tu navegador no soporta geolocalización');
+            }
+        }
+
+        function confirmarReserva() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            const pasajeros = document.getElementById('pasajeros').value;
+            
+            if (!origen || !destino || !busSeleccionado) {
+                alert('⚠️ Completa todos los campos: origen, destino y selecciona un bus');
+                return;
+            }
+            
+                const mensaje = `✅ Reserva confirmada\n\n📍 Origen: ${origen}\n🏁 Destino: ${destino}\n🚌 Bus: ${busSeleccionado.bus.placa}\n📅 Fecha: ${fecha}\n⏰ Hora: ${hora}\n👥 Pasajeros: ${pasajeros}`;
+            alert(mensaje);
+            console.log('Reserva:', { origen, destino, bus: busSeleccionado.bus, fecha, hora, pasajeros });
+
+            document.getElementById('inputOrigen').value = origen;
+            document.getElementById('inputDestino').value = destino;
+            document.getElementById('inputBusPlaca').value = busSeleccionado.bus.placa;
+            document.getElementById('inputBusRuta').value = busSeleccionado.ruta ? busSeleccionado.ruta.nombre : '';
+            document.getElementById('inputFecha').value = fecha;
+            document.getElementById('inputHora').value = hora;
+            document.getElementById('inputPasajeros').value = pasajeros;
+
+            document.getElementById('reservaForm').submit();
+        }
+    </script>
+</body>
+</html>

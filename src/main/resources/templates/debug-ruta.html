@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Ruta</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 3px solid #0d1a3a; padding-bottom: 10px; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #0d1a3a; border-radius: 4px; }
+        .section h2 { margin-top: 0; color: #0d1a3a; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #0d1a3a; color: white; font-weight: bold; }
+        tr:hover { background: #f5f5f5; }
+        .success { color: green; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .stat { padding: 10px; margin: 5px 0; background: white; border-radius: 4px; }
+        .back-link { display: inline-block; margin-bottom: 20px; padding: 10px 20px; background: #0d1a3a; color: white; text-decoration: none; border-radius: 4px; }
+        .back-link:hover { background: #1e3a5f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/rutas}" class="back-link">← Volver a Rutas</a>
+        
+        <h1>🔍 Debug - Información de Ruta</h1>
+        
+        <div class="section" th:if="${ruta}">
+            <h2>Información de la Ruta</h2>
+            <div class="stat"><strong>Nombre:</strong> <span th:text="${ruta.nombre}">-</span></div>
+            <div class="stat"><strong>ID:</strong> <span th:text="${ruta.id}">-</span></div>
+            <div class="stat"><strong>Hora Aproximada:</strong> <span th:text="${ruta.horaAproximada}">-</span></div>
+            <div class="stat"><strong>Activa:</strong> <span th:text="${ruta.activa}">-</span></div>
+        </div>
+        
+        <div class="section" th:if="${ruta}">
+            <h2>📊 Resumen de Datos</h2>
+            <div class="stat">
+                <strong>Buses Embebidos en la Ruta:</strong> 
+                <span class="success" th:text="${#lists.isEmpty(busesEmbebidos) ? '0' : busesEmbebidos.size()}">0</span>
+            </div>
+            <div class="stat">
+                <strong>Paradas Embebidas en la Ruta:</strong> 
+                <span class="success" th:text="${#lists.isEmpty(paradasEmbebidas) ? '0' : paradasEmbebidas.size()}">0</span>
+            </div>
+            <div class="stat">
+                <strong>Buses en Colección Separada (por rutaId):</strong> 
+                <span class="warning" th:text="${busesSeparados.size()}">0</span>
+            </div>
+            <div class="stat">
+                <strong>Paradas en Colección Separada (por rutaId):</strong> 
+                <span class="warning" th:text="${paradasSeparadas.size()}">0</span>
+            </div>
+        </div>
+        
+        <div class="section" th:if="${busesEmbebidos and not #lists.isEmpty(busesEmbebidos)}">
+            <h2>🚌 Buses Embebidos en la Ruta</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Placa</th>
+                        <th>Modelo</th>
+                        <th>Conductor</th>
+                        <th>rutaId</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="bus : ${busesEmbebidos}">
+                        <td th:text="${bus.id}">-</td>
+                        <td th:text="${bus.placa}">-</td>
+                        <td th:text="${bus.modelo}">-</td>
+                        <td th:text="${bus.conductor}">-</td>
+                        <td th:text="${bus.rutaId}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section" th:if="${paradasEmbebidas and not #lists.isEmpty(paradasEmbebidas)}">
+            <h2>📍 Paradas Embebidas en la Ruta</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Orden</th>
+                        <th>rutaId</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="parada : ${paradasEmbebidas}">
+                        <td th:text="${parada.id}">-</td>
+                        <td th:text="${parada.nombre}">-</td>
+                        <td th:text="${parada.ubicacion}">-</td>
+                        <td th:text="${parada.orden}">-</td>
+                        <td th:text="${parada.rutaId}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section" th:if="${busesSeparados and not #lists.isEmpty(busesSeparados)}">
+            <h2>🚌 Buses en Colección Separada</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Placa</th>
+                        <th>Modelo</th>
+                        <th>Conductor</th>
+                        <th>rutaId</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="bus : ${busesSeparados}">
+                        <td th:text="${bus.id}">-</td>
+                        <td th:text="${bus.placa}">-</td>
+                        <td th:text="${bus.modelo}">-</td>
+                        <td th:text="${bus.conductor}">-</td>
+                        <td th:text="${bus.rutaId}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section" th:if="${paradasSeparadas and not #lists.isEmpty(paradasSeparadas)}">
+            <h2>📍 Paradas en Colección Separada</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Orden</th>
+                        <th>rutaId</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="parada : ${paradasSeparadas}">
+                        <td th:text="${parada.id}">-</td>
+                        <td th:text="${parada.nombre}">-</td>
+                        <td th:text="${parada.ubicacion}">-</td>
+                        <td th:text="${parada.orden}">-</td>
+                        <td th:text="${parada.rutaId}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section" th:if="${ruta}">
+            <h2>⚠️ Diagnóstico</h2>
+            <div th:if="${#lists.isEmpty(busesEmbebidos) and busesSeparados.size() == 0}" class="error">
+                ❌ No hay buses: Ni embebidos ni en colección separada.
+            </div>
+            <div th:if="${#lists.isEmpty(paradasEmbebidas) and paradasSeparadas.size() == 0}" class="error">
+                ❌ No hay paradas: Ni embebidas ni en colección separada.
+            </div>
+            <div th:if="${not #lists.isEmpty(busesEmbebidos) or busesSeparados.size() > 0}" class="success">
+                ✅ Buses disponibles.
+            </div>
+            <div th:if="${not #lists.isEmpty(paradasEmbebidas) or paradasSeparadas.size() > 0}" class="success">
+                ✅ Paradas disponibles.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

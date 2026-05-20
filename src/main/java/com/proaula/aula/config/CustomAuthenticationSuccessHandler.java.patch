@@ -1,0 +1,9 @@
+*** Begin Patch
+*** Update File: c:\Users\HP\Downloads\Pro.A(mongobd) (4) (2)\Pro.A(Actual SQL) (1)\Pro.A(Actual)\Pro.Aula (Spring boot )\aula\src\main\java\com\proaula\aula\config\CustomAuthenticationSuccessHandler.java
+@@
+-import com.proaula.aula.Service.UsuarioService;
+-import jakarta.servlet.ServletException;
++import com.proaula.aula.Service.EmailService;
++import com.proaula.aula.Service.UsuarioService;
++import jakarta.servlet.ServletException;
+*** End Patch

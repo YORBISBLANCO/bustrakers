@@ -1,0 +1,67 @@
+/* Paleta y estilos actualizados para página "Actualizar Buses" — paleta azul coherente con index2 */
+:root {
+	--azul-oscuro: #01315f;
+	--azul-claro: #1e5a96;
+	--gris-fondo: #f5f6f7;
+	--gris-borde: #dee2e6;
+	--negro-oscuro: #212529;
+	--amarillo-acento: #ffc107;
+	--radio: 10px;
+	--max-ancho: 1100px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Montserrat:wght@600&display=swap');
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	background: var(--gris-fondo);
+	color: var(--negro-oscuro);
+	margin: 0;
+}
+
+img, video { max-width: 100%; height: auto; display: block; }
+
+main, header, footer { width: 100%; max-width: var(--max-ancho); margin: 0 auto; padding: 1.2rem; box-sizing: border-box; }
+
+@media (max-width: 900px) { main, header, footer { max-width: 98vw; padding: 0.8rem; } }
+
+header {
+	background: linear-gradient(90deg, var(--azul-claro) 0%, var(--azul-oscuro) 100%);
+	color: white;
+	text-align: center;
+	padding: clamp(18px, 3vw, 28px);
+	box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+header img#logo2 { width: clamp(120px, 18vw, 200px); margin-bottom: 8px; }
+header h1 { margin: 0; font-size: clamp(1.25rem, 3.5vw, 2rem); letter-spacing: 1px; }
+header h2 { margin: 6px 0 0 0; font-weight: 400; opacity: 0.95; }
+
+nav { background-color: white; padding: 8px 0; box-shadow: 0 1px 6px rgba(0,0,0,0.04); border-top: 3px solid var(--amarillo-acento); }
+nav ul { list-style: none; padding: 0; margin: 0; text-align: center; }
+nav ul li { display: inline-block; margin: 0 12px; }
+nav ul li a { text-decoration: none; color: var(--azul-oscuro); font-weight: 600; padding: 8px 14px; border-radius: 6px; }
+nav ul li a:hover { background: linear-gradient(90deg, #eaf4ff, #f5fbff); color: var(--azul-oscuro); box-shadow: 0 4px 12px rgba(1,49,95,0.06); }
+
+main { max-width: 900px; margin: 24px auto; padding: 24px; background: white; border-radius: var(--radio); box-shadow: 0 6px 24px rgba(3,27,52,0.06); border: 1px solid var(--gris-borde); }
+
+h2 { color: var(--azul-oscuro); margin-top: 0; }
+
+form { display: flex; flex-direction: column; align-items: stretch; }
+label { margin-top: 12px; color: var(--azul-oscuro); font-weight: 600; }
+input[type="text"], select { padding: 10px 12px; border: 2px solid var(--gris-borde); border-radius: 8px; margin-top: 6px; background: #fbfdff; color: var(--negro-oscuro); }
+
+input:focus, select:focus { outline: none; border-color: var(--azul-claro); box-shadow: 0 0 0 4px rgba(30,90,150,0.06); }
+
+button { margin-top: 18px; padding: 12px 16px; border: none; border-radius: 8px; cursor: pointer; color: white; background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-claro)); font-weight: 700; font-size: 1rem; }
+button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(1,49,95,0.12); }
+
+footer#pie { text-align: center; padding: 18px; margin-top: 18px; color: var(--negro-oscuro); background: white; border-top: 1px solid var(--gris-borde); }
+
+@media (max-width: 700px) { header { padding: 18px 12px; } main { margin: 16px; padding: 16px; } nav ul li { margin: 0 8px; } }
+
+}
+*** End Patch

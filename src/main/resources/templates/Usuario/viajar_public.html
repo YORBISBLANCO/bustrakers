@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Reserva de viajes - Bustraker Público">
+    <meta name="theme-color" content="#01315f">
+    <title>Viajar - Bustraker Público</title>
+    <link rel="stylesheet" th:href="@{/css/style_viajar.css}">
+    <link rel="shortcut icon" th:href="@{/images/Bus_icono.png}" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #map { height: 100vh; width: 100%; }
+        .options-panel {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            width: min(340px, calc(100vw - 40px));
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .options-panel h2 {
+            margin: 0 0 15px 0;
+            color: #0d1a3a;
+            font-size: 1.3em;
+            border-bottom: 2px solid #0d1a3a;
+            padding-bottom: 10px;
+        }
+        .options-panel label {
+            display: block;
+            margin: 12px 0 6px 0;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+        .options-panel select,
+        .options-panel input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            box-sizing: border-box;
+        }
+        .options-panel select:disabled,
+        .options-panel input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .options-panel button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #0d1a3a 0%, #1e3a5f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .options-panel button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .btn-primary { background: linear-gradient(135deg, #0d1a3a 0%, #1e3a5f 100%); }
+        .ruta-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 4px solid #0d1a3a;
+        }
+        .badge {
+            display: inline-block;
+            background: #0d1a3a;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="options-panel">
+        <h2><i class="fas fa-bus"></i> Planear Viaje</h2>
+        
+        <label for="origen"><i class="fas fa-map-marker-alt"></i> 1. ¿En qué barrio estás?</label>
+        <select id="origen" onchange="actualizarDestinosDisponibles()">
+            <option value="">Selecciona tu barrio actual</option>
+        </select>
+        
+        <button onclick="usarUbicacionActual()" style="background: #27ae60; margin: 8px 0;">
+            <i class="fas fa-location-arrow"></i> Detectar Mi Ubicación
+        </button>
+        
+        <label for="destino"><i class="fas fa-map-pin"></i> 2. ¿A qué barrio vas?</label>
+        <select id="destino" onchange="buscarRutasDisponibles()" disabled>
+            <option value="">Primero selecciona tu barrio de origen</option>
+        </select>
+        
+        <label for="ruta"><i class="fas fa-bus"></i> 3. Rutas Disponibles:</label>
+        <select id="ruta" onchange="mostrarRutaEnMapa()" disabled>
+            <option value="">Primero selecciona origen y destino</option>
+        </select>
+        
+        <div id="rutaInfo" class="ruta-info" style="display: none;">
+            <h4><i class="fas fa-info-circle"></i> Ruta Seleccionada</h4>
+            <p><strong>Barrios:</strong> <span id="infoBarrios"></span></p>
+            <p><strong>Hora:</strong> <span id="infoHora"></span></p>
+        </div>
+        
+        <button onclick="mostrarRutaEnMapa()" class="btn-primary">
+            <i class="fas fa-map-marked-alt"></i> Ver Ruta en Mapa
+        </button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Variables globales
+        var map;
+        var rutas = [];
+        var barrios = [];
+        var barriosData = [];
+        var coordenadasCache = {};
+        var origenMarker = null;
+        var destinoMarker = null;
+        var rutaLine = null;
+        var barrioMarkers = [];
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando Bustraker Público...');
+            
+            // Cargar barrios desde API
+            cargarBarrios();
+            
+            // Cargar rutas desde API
+            cargarRutas();
+            
+            // Inicializar mapa
+            initMap();
+        });
+
+        // Inicializar mapa de Leaflet
+        function initMap() {
+            map = L.map('map').setView([10.4236, -75.5478], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            console.log('✅ Mapa inicializado');
+        }
+
+        // Cargar lista de barrios desde API
+        async function cargarBarrios() {
+            try {
+                const response = await fetch('/api/barrios/todos');
+                if (response.ok) {
+                    const data = await response.json();
+                    barriosData = data;
+                    barrios = barriosData.map(b => b.nombre);
+                    console.log('✅', barrios.length, 'barrios cargados');
+                    
+                    const origenSelect = document.getElementById('origen');
+                    origenSelect.innerHTML = '<option value="">Selecciona tu barrio actual</option>';
+                    barrios.sort().forEach(barrio => {
+                        const opt = document.createElement('option');
+                        opt.value = barrio;
+                        opt.textContent = barrio.charAt(0).toUpperCase() + barrio.slice(1);
+                        origenSelect.appendChild(opt);
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error cargando barrios:', error);
+            }
+        }
+
+        // Cargar rutas desde API
+        async function cargarRutas() {
+            try {
+                const response = await fetch('/api/rutas');
+                if (response.ok) {
+                    rutas = await response.json();
+                    console.log('✅', rutas.length, 'rutas cargadas');
+                }
+            } catch (error) {
+                console.error('❌ Error cargando rutas:', error);
+            }
+        }
+
+        function normalizarTexto(texto) {
+            return texto.toString().toLowerCase()
+                .trim()
+                .replace(/á/g, 'a')
+                .replace(/é/g, 'e')
+                .replace(/í/g, 'i')
+                .replace(/ó/g, 'o')
+                .replace(/ú/g, 'u')
+                .replace(/ñ/g, 'n');
+        }
+
+        function distanciaHaversine(lat1, lng1, lat2, lng2) {
+            const R = 6371; // radio de la Tierra en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function obtenerBarrioMasCercano(lat, lng) {
+            if (!barriosData.length) return null;
+            let mejorBarrio = null;
+            let distanciaMinima = Infinity;
+            barriosData.forEach(barrio => {
+                const latBarrio = parseFloat(barrio.latitud);
+                const lngBarrio = parseFloat(barrio.longitud);
+                if (Number.isNaN(latBarrio) || Number.isNaN(lngBarrio)) {
+                    return;
+                }
+                const distancia = distanciaHaversine(lat, lng, latBarrio, lngBarrio);
+                if (distancia < distanciaMinima) {
+                    distanciaMinima = distancia;
+                    mejorBarrio = barrio;
+                }
+            });
+            return mejorBarrio;
+        }
+
+        // Cuando se selecciona el origen, habilitar destino
+        function actualizarDestinosDisponibles() {
+            const origen = document.getElementById('origen').value;
+            const destinoSelect = document.getElementById('destino');
+            const rutaSelect = document.getElementById('ruta');
+            
+            if (origen) {
+                destinoSelect.disabled = false;
+                destinoSelect.innerHTML = '<option value="">Selecciona tu barrio de destino</option>';
+                
+                barrios.forEach(barrio => {
+                    if (barrio !== origen) {
+                        const opt = document.createElement('option');
+                        opt.value = barrio;
+                        opt.textContent = barrio.charAt(0).toUpperCase() + barrio.slice(1);
+                        destinoSelect.appendChild(opt);
+                    }
+                });
+                
+                rutaSelect.disabled = true;
+                rutaSelect.innerHTML = '<option value="">Primero selecciona origen y destino</option>';
+                document.getElementById('rutaInfo').style.display = 'none';
+                
+                console.log('✅ Origen seleccionado:', origen);
+            } else {
+                destinoSelect.disabled = true;
+                destinoSelect.innerHTML = '<option value="">Primero selecciona tu barrio de origen</option>';
+            }
+        }
+
+        // Cuando se selecciona origen y destino, filtrar rutas
+        function buscarRutasDisponibles() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            const rutaSelect = document.getElementById('ruta');
+            
+            if (origen && destino) {
+                const rutasFiltradas = rutas.filter(ruta => {
+                    const barriosRuta = ruta.barrios || [];
+                    const tieneOrigen = barriosRuta.some(b => 
+                        b.toLowerCase() === origen.toLowerCase()
+                    );
+                    const tieneDestino = barriosRuta.some(b => 
+                        b.toLowerCase() === destino.toLowerCase()
+                    );
+                    return tieneOrigen && tieneDestino;
+                });
+                
+                console.log('✅', rutasFiltradas.length, 'rutas encontradas para', origen, '→', destino);
+                
+                rutaSelect.disabled = false;
+                rutaSelect.innerHTML = '<option value="">Selecciona una ruta</option>';
+                
+                if (rutasFiltradas.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = 'No hay rutas disponibles entre estos barrios';
+                    opt.disabled = true;
+                    rutaSelect.appendChild(opt);
+                    return;
+                }
+                
+                rutasFiltradas.forEach((ruta, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = ruta.nombre;
+                    opt.setAttribute('data-ruta-json', JSON.stringify(ruta));
+                    rutaSelect.appendChild(opt);
+                });
+            } else {
+                rutaSelect.disabled = true;
+                rutaSelect.innerHTML = '<option value="">Primero selecciona origen y destino</option>';
+            }
+        }
+
+        // Mostrar ruta en mapa cuando se selecciona
+        function mostrarRutaEnMapa() {
+            const rutaSelect = document.getElementById('ruta');
+            const selectedOption = rutaSelect.options[rutaSelect.selectedIndex];
+            const rutaJson = selectedOption.getAttribute('data-ruta-json');
+            
+            if (rutaJson) {
+                const ruta = JSON.parse(rutaJson);
+                console.log('✅ Ruta seleccionada:', ruta.nombre);
+                
+                document.getElementById('infoBarrios').innerHTML = ruta.barrios
+                    .map(b => '<span class="badge">' + b + '</span>')
+                    .join('');
+                document.getElementById('infoHora').textContent = ruta.horaAproximada || 'No especificada';
+                document.getElementById('rutaInfo').style.display = 'block';
+                
+                limpiarMapa();
+                cargarCoordenadasYMostrar(ruta);
+            }
+        }
+
+        // Cargar coordenadas desde API y mostrar ruta
+        async function cargarCoordenadasYMostrar(ruta) {
+            try {
+                const response = await fetch('/api/barrios/coordenadas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ruta.barrios)
+                });
+                
+                if (response.ok) {
+                    const coords = await response.json();
+                    mostrarRutaEnMapaConCoords(ruta, coords);
+                }
+            } catch (error) {
+                console.error('❌ Error cargando coordenadas:', error);
+            }
+        }
+
+        // Mostrar ruta con coordenadas en el mapa
+        function mostrarRutaEnMapaConCoords(ruta, coords) {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            
+            const origenCoords = coords[origen.toLowerCase()] || [10.4236, -75.5478];
+            const destinoCoords = coords[destino.toLowerCase()] || [10.4236, -75.5478];
+            
+            origenMarker = L.marker(origenCoords)
+                .addTo(map)
+                .bindPopup('<b>📍 Origen:</b> ' + origen)
+                .openPopup();
+            
+            destinoMarker = L.marker(destinoCoords)
+                .addTo(map)
+                .bindPopup('<b>🏁 Destino:</b> ' + destino);
+            
+            const latlngs = [origenCoords, destinoCoords];
+            rutaLine = L.polyline(latlngs, {
+                color: '#0d1a3a',
+                weight: 5,
+                opacity: 0.8,
+                dashArray: '10, 10'
+            }).addTo(map);
+            
+            map.fitBounds(rutaLine.getBounds(), { padding: [50, 50] });
+            
+            console.log('✅ Ruta mostrada en mapa');
+        }
+
+        // Limpiar mapa
+        function limpiarMapa() {
+            if (origenMarker) map.removeLayer(origenMarker);
+            if (destinoMarker) map.removeLayer(destinoMarker);
+            if (rutaLine) map.removeLayer(rutaLine);
+            barrioMarkers.forEach(m => map.removeLayer(m));
+            barrioMarkers = [];
+        }
+
+        // Usar ubicación actual
+        function usarUbicacionActual() {
+            if (!barriosData.length) {
+                alert('⏳ Cargando barrios, por favor espera unos segundos e intenta de nuevo.');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    map.setView([lat, lng], 15);
+                    
+                    if (origenMarker) map.removeLayer(origenMarker);
+                    origenMarker = L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup('<b>📍 Tu ubicación actual</b>')
+                        .openPopup();
+
+                    const barrioCercano = obtenerBarrioMasCercano(lat, lng);
+                    if (barrioCercano) {
+                        const origenSelect = document.getElementById('origen');
+                        origenSelect.value = barrioCercano.nombre;
+                        actualizarDestinosDisponibles();
+                        origenMarker.bindPopup('<b>📍 Tu ubicación actual</b><br><small>' + barrioCercano.nombre + '</small>').openPopup();
+                        alert('📍 Ubicación detectada en ' + barrioCercano.nombre + '. Origen seleccionado automáticamente.');
+                    } else {
+                        alert('📍 Ubicación detectada. Ahora selecciona tu destino.');
+                    }
+                }, error => {
+                    alert('❌ No se pudo detectar la ubicación: ' + error.message);
+                });
+            } else {
+                alert('❌ Tu navegador no soporta geolocalización');
+            }
+        }
+    </script>
+</body>
+</html>

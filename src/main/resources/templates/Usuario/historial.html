@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Viajes - Bustraker</title>
+    <link rel="stylesheet" th:href="@{/css/style_responsive.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-bus"></i> Bustraker Usuario</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a th:href="@{/index_3}"><i class="fas fa-home"></i> Inicio</a>
+                <a th:href="@{/viajar}"><i class="fas fa-route"></i> Viajar</a>
+                <a th:href="@{/consultas}"><i class="fas fa-search"></i> Consultas</a>
+                <a th:href="@{/historial}" class="active"><i class="fas fa-history"></i> Historial</a>
+                <a th:href="@{/perfil}"><i class="fas fa-user"></i> Perfil</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1><i class="fas fa-history"></i> Historial de Viajes</h1>
+                <div class="header-actions">
+                    <span th:text="${usuario?.nombres ?: 'Usuario'}" class="username"></span>
+                    <a th:href="@{/logout}" class="btn btn-secondary"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list"></i> Mis Viajes Recientes</h3>
+                        <div class="card-actions">
+                            <span class="total-count">Mostrando últimos 10 viajes</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(viajes)}" class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay viajes registrados todavía. Reserva tu primer viaje usando la opción "Viajar" en el menú.
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(viajes)}" class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Origen → Destino</th>
+                                        <th>Fecha</th>
+                                        <th>Hora</th>
+                                        <th>Bus</th>
+                                        <th>Ruta</th>
+                                        <th>Pasajeros</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="viaje, iterStat : ${viajes}">
+                                        <td th:text="${iterStat.index + 1}">1</td>
+                                        <td><span th:text="${viaje.origen}"></span> → <span th:text="${viaje.destino}"></span></td>
+                                        <td th:text="${viaje.fecha}">--</td>
+                                        <td th:text="${viaje.hora}">--</td>
+                                        <td th:text="${viaje.busPlaca}">--</td>
+                                        <td th:text="${viaje.busRuta}">--</td>
+                                        <td th:text="${viaje.pasajeros}">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(viajes)}" class="empty-state">
+                            <i class="fas fa-bus"></i>
+                            <h4>Aún no has realizado ningún viaje</h4>
+                            <p>Reserva tu primer viaje usando la opción "Viajar" en el menú.</p>
+                            <a th:href="@{/viajar}" class="btn btn-primary">
+                                <i class="fas fa-route"></i> Hacer una reserva
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

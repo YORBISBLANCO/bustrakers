@@ -1,0 +1,97 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.proaula.aula:aula >------------------------
+[INFO] Building Aula 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.12:run (default-cli) > test-compile @ aula >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ aula ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 66 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ aula ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ aula ---
+[INFO] skip non existing resourceDirectory C:\Users\HP\Downloads\Pro.A(mongobd) (4) (2)\Pro.A(Actual SQL) (1)\Pro.A(Actual)\Pro.Aula (Spring boot )\aula\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ aula ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] <<< spring-boot:3.2.12:run (default-cli) < test-compile @ aula <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.12:run (default-cli) @ aula ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v3.2.12)
+
+2026-05-17 22:47:31 - Starting AulaApplication using Java 21.0.9 with PID 28072 (C:\Users\HP\Downloads\Pro.A(mongobd) (4) (2)\Pro.A(Actual SQL) (1)\Pro.A(Actual)\Pro.Aula (Spring boot )\aula\target\classes started by HP in C:\Users\HP\Downloads\Pro.A(mongobd) (4) (2)\Pro.A(Actual SQL) (1)\Pro.A(Actual)\Pro.Aula (Spring boot )\aula)
+2026-05-17 22:47:31 - Running with Spring Boot v3.2.12, Spring v6.1.15
+2026-05-17 22:47:31 - The following 1 profile is active: "dev"
+2026-05-17 22:47:32 - Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-05-17 22:47:32 - Finished Spring Data repository scanning in 64 ms. Found 10 MongoDB repository interfaces.
+2026-05-17 22:47:33 - Tomcat initialized with port 8082 (http)
+2026-05-17 22:47:33 - Starting service [Tomcat]
+2026-05-17 22:47:33 - Starting Servlet engine: [Apache Tomcat/10.1.33]
+2026-05-17 22:47:33 - Initializing Spring embedded WebApplicationContext
+2026-05-17 22:47:33 - Root WebApplicationContext: initialization completed in 1706 ms
+2026-05-17 22:47:33 - MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "4.11.5"}, "os": {"type": "Windows", "name": "Windows 11", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Oracle Corporation/21.0.9+7-LTS-338"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=null, transportSettings=null, streamFactoryFactory=null, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@7f0d8eff], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@149aa7b2, com.mongodb.Jep395RecordCodecProvider@3ca3648, com.mongodb.KotlinCodecProvider@2a99ca99]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@39f0c343], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null}
+2026-05-17 22:47:33 - Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=27, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=22026400}
+2026-05-17 22:47:33 - Filter 'jwtAuthenticationFilter' configured for use
+2026-05-17 22:47:34 - Adding welcome page template: index
+2026-05-17 22:47:34 - Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-05-17 22:47:34 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@416b681c, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@46d69ca4, org.springframework.security.web.context.SecurityContextHolderFilter@3e0855b0, org.springframework.security.web.header.HeaderWriterFilter@3cb173db, org.springframework.security.web.authentication.logout.LogoutFilter@5c3007d, org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter@61d42275, org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter@46fb9581, com.proaula.aula.config.JwtAuthenticationFilter@5d84e363, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@56ba8e8c, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@16e5344c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@47fca3cc, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5c9b5e62, org.springframework.security.web.session.SessionManagementFilter@249a45fd, org.springframework.security.web.access.ExceptionTranslationFilter@6c2dd88b, org.springframework.security.web.access.intercept.AuthorizationFilter@79ec57b8]
+2026-05-17 22:47:34 - Tomcat started on port 8082 (http) with context path ''
+2026-05-17 22:47:34 - Started AulaApplication in 3.976 seconds (process running for 4.364)
+2026-05-17 22:47:35 - 🗺️ Inicializando barrios de Cartagena desde Localidades.java...
+2026-05-17 22:47:35 - 🔐 Verificando códigos de administrador en la base de datos...
+2026-05-17 22:47:35 - ✅ 0 barrios guardados en la base de datos
+2026-05-17 22:47:35 - 📊 Datos actuales: 298 rutas, 890 buses, 3018 usuarios, 162 barrios
+2026-05-17 22:47:35 - ⚠️ Se detectaron rutas existentes. Se omite la creación de rutas y buses para evitar duplicados.
+2026-05-17 22:47:35 - ✅ Rutas existentes detectadas. No se crearon rutas ni buses nuevos.
+2026-05-17 22:47:35 - ✅ El administrador 'admin' ya existe. No se creó un nuevo admin.
+2026-05-17 22:47:35 - 👥 Usuarios normales existentes: 3013, objetivo: 3000, faltantes: 0
+2026-05-17 22:47:35 - ✅ Ya existen 3013 usuarios normales. No se agregaron más.
+2026-05-17 22:47:35 - 🔧 Normalizando roles en la base de datos...
+2026-05-17 22:47:35 - ✅ 0 roles normalizados en la base de datos
+2026-05-17 22:47:35 -    Roles válidos: ROLE_USER, ROLE_ADMIN
+2026-05-17 22:47:35 - 🎉 ================================================
+2026-05-17 22:47:35 - 🎉 CARGA DE DATOS COMPLETADA EXITOSAMENTE
+2026-05-17 22:47:35 - 🎉 ================================================
+2026-05-17 22:47:35 - 📊 RESUMEN:
+2026-05-17 22:47:35 -    ✅ Rutas: 298
+2026-05-17 22:47:35 -    ✅ Buses: 890
+2026-05-17 22:47:35 -    ✅ Usuarios: 3018
+2026-05-17 22:47:35 -    ✅ Paradas: 1068
+2026-05-17 22:47:35 -    📈 TOTAL REGISTROS: 5274
+2026-05-17 22:47:35 - 🎉 ================================================
+2026-05-17 22:47:35 - 🔐 CREDENCIALES POR DEFECTO:
+2026-05-17 22:47:35 -    Admin: user=admin, pass=admin123
+2026-05-17 22:47:35 -    Usuario: user=[cualquiera generado], pass=user123
+2026-05-17 22:47:35 - 🎉 ================================================
+2026-05-17 22:48:16 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-17 22:48:16 - Initializing Servlet 'dispatcherServlet'
+2026-05-17 22:48:16 - Completed initialization in 4 ms
+Error enviando correo a admin@bustraker.edu.co: Mail server connection failed. Failed messages: org.eclipse.angus.mail.util.MailConnectException: Couldn't connect to host, port: localhost, 25; timeout -1;
+  nested exception is:
+	java.net.ConnectException: Connection refused: connect
+2026-05-17 22:48:17 - NoResourceFoundException: GET /dashboarddskd
+Error enviando correo a admin@bustraker.edu.co: Mail server connection failed. Failed messages: org.eclipse.angus.mail.util.MailConnectException: Couldn't connect to host, port: localhost, 25; timeout -1;
+  nested exception is:
+	java.net.ConnectException: Connection refused: connect
+2026-05-17 22:48:33 - NoResourceFoundException: GET /dashboarddskd
+2026-05-17 22:55:27 - NoResourceFoundException: GET /proyectos
+2026-05-17 22:55:28 - NoResourceFoundException: GET /proyectossd
+Error enviando correo a ddmfof@gmail.com: Mail server connection failed. Failed messages: org.eclipse.angus.mail.util.MailConnectException: Couldn't connect to host, port: localhost, 25; timeout -1;
+  nested exception is:
+	java.net.ConnectException: Connection refused: connect
+2026-05-17 22:56:36 - NoResourceFoundException: GET /.well-known/appspecific/com.chrome.devtools.json

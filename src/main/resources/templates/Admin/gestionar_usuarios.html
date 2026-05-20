@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Gestionar usuarios - Bustraker Admin">
+    <meta name="theme-color" content="#01315f">
+    <title>Gestionar Usuarios - Bustraker Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style_3.css}">
+    <link rel="shortcut icon" th:href="@{/images/Bus_icono.png}" type="image/x-icon">
+    <style>
+        body {
+            background: #f5f6f7;
+            color: #212529;
+        }
+        header {
+            background: linear-gradient(90deg, #01315f 40%, #1e5a96 100%);
+            color: #ffffff;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            box-sizing: border-box;
+            padding: 2rem 1.5rem 1.5rem;
+        }
+        header h1,
+        header h2 {
+            color: #ffffff;
+        }
+        #ingreso a {
+            background: #ffc107;
+            color: #01315f;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+        }
+        nav ul li a {
+            color: #01315f;
+        }
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: #1e5a96;
+        }
+        main {
+            padding: 1.5rem 2rem;
+            background: #ffffff;
+        }
+        .card-section {
+            background: #ffffff;
+            border: 1px solid #dde4ed;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(1, 49, 95, 0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card-section h3 {
+            color: #01315f;
+        }
+        .card-section p,
+        .card-section label,
+        .card-section th,
+        .card-section td,
+        .card-section input,
+        .card-section select,
+        .card-section button,
+        .card-section a {
+            color: #212529;
+        }
+        .card-section input,
+        .card-section select {
+            border: 1px solid #cfdce8;
+            border-radius: 0.75rem;
+            padding: 0.85rem 1rem;
+            background: #f8fbff;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .card-section table th {
+            background: #01315f;
+            color: #ffffff;
+        }
+        .card-section table td {
+            border-color: #dee2e6;
+        }
+        .card-section button,
+        .card-section .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            background: #01315f;
+            color: #ffffff;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.25rem;
+            cursor: pointer;
+            min-width: auto;
+            width: auto;
+        }
+        .card-section .btn-action-secondary {
+            background: #f8f9fa;
+            color: #01315f;
+            border: 1px solid #cfdce8;
+        }
+        .card-section .btn-action-danger {
+            background: #dc3545;
+            color: #ffffff;
+            border: none;
+        }
+        .card-section .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img th:src="@{/images/Bus_palmera.png}" alt="Bus palmera" id="logo2">
+        <h1>Bustraker - Panel Admin</h1>
+        <h2>Gestionar Usuarios</h2>
+        <div id="ingreso">
+            <a th:href="@{/index_2}">Volver al Panel</a>
+        </div>
+    </header>
+
+    <nav style="position: relative;">
+        <ul>
+            <li><a th:href="@{/index_2}">Panel Admin</a></li>
+            <li><a th:href="@{/registro-buses}">Registrar Buses</a></li>
+            <li><a th:href="@{/actualizarbuses}">Actualizar Buses</a></li>
+            <li><a th:href="@{/eliminarbuses}">Eliminar Buses</a></li>
+            <li><a th:href="@{/gestionar-usuarios}" style="color: #1e5a96; font-weight: 600;">Gestionar Usuarios</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h2>Gestión de Usuarios</h2>
+        <p style="color: #6c757d;">Aquí puedes ver, editar y eliminar cuentas de usuario en el sistema.</p>
+
+        <div th:if="${mensaje != null}" style="background:#e6f3ff;padding:10px;border:1px solid #cfe2ff;margin-bottom:10px;border-radius:0.75rem;">
+            <strong th:text="${mensaje}" style="color:#01315f;">Mensaje</strong>
+        </div>
+
+        <section id="ListaAdministradores" class="card-section">
+            <h3>Administradores</h3>
+            <p>Total de administradores: <strong th:text="${administradores != null ? administradores.size() : 0}">0</strong></p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background-color: #01315f; color: white;">
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">ID</th>
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Nombre</th>
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Email</th>
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="usuario : ${administradores}" style="border-bottom: 1px solid #ddd; background: #ffffff;">
+                        <td style="border: 1px solid #ccc; padding: 10px;" th:text="${usuario.id}">1</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;" th:text="${usuario.nombres} + ' ' + ${usuario.apellidos}">Admin Nombre</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;" th:text="${usuario.email}">admin@mail.com</td>
+                        <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                            <a th:href="@{/editar-usuario/{id}(id=${usuario.id})}" class="btn-action btn-action-secondary" style="margin-right: 10px;">Editar</a>
+                            <a th:href="@{/eliminar-usuario/{id}(id=${usuario.id})}" class="btn-action btn-action-danger" onclick="return confirm('¿Eliminar administrador?');">Eliminar</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${administradores == null or administradores.size() == 0}">
+                        <td colspan="4" style="text-align: center; padding: 20px; border: 1px solid #ccc;">No hay administradores registrados</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="ListaUsuarios" class="card-section">
+            <h3>Usuarios Registrados</h3>
+            <p>Total de usuarios: <strong th:text="${usuarios != null ? usuarios.size() : 0}">0</strong></p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background-color: #01315f; color: white;">
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">ID</th>
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Nombre</th>
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Email</th>
+                        <th style="border: 1px solid #ccc; padding: 10px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="usuario : ${usuarios}" style="border-bottom: 1px solid #ddd; background: #ffffff;">
+                        <td style="border: 1px solid #ccc; padding: 10px;" th:text="${usuario.id}">1</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;" th:text="${usuario.nombres} + ' ' + ${usuario.apellidos}">Juan Perez</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;" th:text="${usuario.email}">juan@mail.com</td>
+                        <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                            <a th:href="@{/editar-usuario/{id}(id=${usuario.id})}" class="btn-action btn-action-secondary" style="margin-right: 10px;">Editar</a>
+                            <a th:href="@{/eliminar-usuario/{id}(id=${usuario.id})}" class="btn-action btn-action-danger" onclick="return confirm('¿Eliminar usuario?');">Eliminar</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${usuarios == null or usuarios.size() == 0}">
+                        <td colspan="4" style="text-align: center; padding: 20px; border: 1px solid #ccc;">No hay usuarios registrados</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="AgregarUsuario" class="card-section" style="margin-top: 40px;">
+            <h3>Agregar Nuevo Usuario</h3>
+            <form method="post" action="/admin-crear-usuario">
+                <fieldset style="border: 1px solid #cfdce8; padding: 1.25rem; border-radius: 1rem; background: #f8fbff;">
+                    <legend style="font-weight: 700; color: #01315f;">Información del Usuario</legend>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem;">Nombres:</label>
+                        <input type="text" name="nombres" placeholder="Nombres completos" required style="width:100%; padding:0.9rem 1rem; border:1px solid #cfdce8; border-radius:0.75rem; background:#fff;">
+                    </div>
+                    <div style="margin-top:1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Email:</label>
+                        <input type="email" name="email" placeholder="email@example.com" required style="width:100%; padding:0.9rem 1rem; border:1px solid #cfdce8; border-radius:0.75rem; background:#fff;">
+                    </div>
+                    <div style="margin-top:1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Usuario:</label>
+                        <input type="text" name="username" placeholder="nombre_usuario" required style="width:100%; padding:0.9rem 1rem; border:1px solid #cfdce8; border-radius:0.75rem; background:#fff;">
+                    </div>
+                    <div style="margin-top:1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Contraseña:</label>
+                        <input type="password" name="password" placeholder="contraseña" required style="width:100%; padding:0.9rem 1rem; border:1px solid #cfdce8; border-radius:0.75rem; background:#fff;">
+                    </div>
+                    <div style="margin-top:1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem;">Rol:</label>
+                        <select name="role" required style="width:100%; padding:0.9rem 1rem; border:1px solid #cfdce8; border-radius:0.75rem; background:#fff;">
+                            <option value="">-- Selecciona rol --</option>
+                            <option value="USER">Usuario</option>
+                            <option value="ADMIN">Administrador</option>
+                        </select>
+                    </div>
+                </fieldset>
+                <div style="margin-top: 1rem;">
+                    <button type="submit" style="background:#01315f;color:#fff;border:none;border-radius:0.75rem;padding:0.9rem 1.5rem;cursor:pointer;">Crear Usuario</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

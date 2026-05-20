@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login JWT - Aula</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h2 {
+            color: #333;
+            font-weight: 600;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            color: white;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .token-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        .token-display.show {
+            display: block;
+        }
+        .copy-btn {
+            background: #28a745;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background: #218838;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>🔐 Login JWT</h2>
+            <p class="text-muted">Ingresa tus credenciales para obtener un token JWT</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="username" placeholder="Ingresa tu usuario" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
+            </div>
+            <button type="submit" class="btn btn-login" id="loginBtn">
+                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="token-display" id="tokenDisplay">
+            <h5>🎉 ¡Login Exitoso!</h5>
+            <p><strong>Usuario:</strong> <span id="userName"></span></p>
+            <p><strong>Token JWT:</strong></p>
+            <textarea id="jwtToken" class="form-control" rows="4" readonly></textarea>
+            <button class="copy-btn mt-2" onclick="copyToken()">Copiar Token</button>
+            <button class="copy-btn mt-2 ms-2" onclick="testToken()" style="background: #17a2b8;">Probar Token</button>
+            <small class="text-muted d-block mt-2">
+                Usa este token en el header: <code>Authorization: Bearer [token]</code>
+            </small>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const spinner = loginBtn.querySelector('.spinner-border');
+        const alertContainer = document.getElementById('alertContainer');
+        const tokenDisplay = document.getElementById('tokenDisplay');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Mostrar spinner
+            loginBtn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            // Limpiar alertas anteriores
+            alertContainer.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    console.error('No se pudo parsear JSON:', jsonError);
+                }
+
+                if (response.ok) {
+                    // Login exitoso
+                    document.getElementById('userName').textContent = data.username;
+                    document.getElementById('jwtToken').value = data.token;
+                    tokenDisplay.classList.add('show');
+
+                    // Ocultar formulario
+                    loginForm.style.display = 'none';
+
+                    showAlert('¡Login exitoso! Tu token JWT está listo.', 'success');
+                } else {
+                    showAlert(data?.message || `Error ${response.status}: ${response.statusText}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error de conexión. Verifica que el servidor esté corriendo.', 'danger');
+                console.error('Error:', error);
+            } finally {
+                // Ocultar spinner
+                loginBtn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        });
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+        }
+
+        function copyToken() {
+            const tokenTextarea = document.getElementById('jwtToken');
+            tokenTextarea.select();
+            document.execCommand('copy');
+
+            // Mostrar feedback
+            const copyBtn = event.target;
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '¡Copiado!';
+            copyBtn.style.background = '#17a2b8';
+
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = '#28a745';
+            }, 2000);
+        }
+
+        // Función para probar el token
+        function testToken() {
+            const token = document.getElementById('jwtToken').value;
+            if (!token) {
+                showAlert('No hay token para probar', 'warning');
+                return;
+            }
+
+            fetch('/api/auth/test', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(async response => {
+                if (response.ok) {
+                    return response.json();
+                }
+
+                let errorData = null;
+                try {
+                    errorData = await response.json();
+                } catch {
+                    // Ignorar si no es JSON
+                }
+
+                throw new Error(errorData?.message || `Token inválido o expirado (${response.status})`);
+            })
+            .then(data => {
+                showAlert(`✅ Token válido - Usuario: ${data.username}`, 'success');
+            })
+            .catch(error => {
+                showAlert(`❌ ${error.message}`, 'danger');
+            });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

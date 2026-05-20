@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Actualizar buses - Bustraker Admin">
+    <meta name="theme-color" content="#01315f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Actualizar Buses - Bustraker Admin</title>
+    <link rel="stylesheet" th:href="@{/Css/style_3.css}">
+    <link rel="stylesheet" th:href="@{/Css/Style_Actualizar.css}">
+    <link rel="shortcut icon" th:href="@{/images/Bus_icono.png}" type="image/x-icon">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { min-height: 100%; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f4f4f4 0%, #dde1e7 100%); color: #1f2d3d; }
+        header { background: linear-gradient(90deg, #01315f 60%, #1e5a96 100%); color: #ffffff; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; max-width: 100%; position: relative; padding: 2rem 1.5rem 1.5rem; }
+        header img#logo2 { width: clamp(120px, 18vw, 180px); height: auto; margin-bottom: 1rem; }
+        header h1 { font-size: clamp(1.6rem, 4vw, 2.6rem); letter-spacing: 2px; margin: 0 0 8px; font-weight: 700; text-shadow: 1px 2px 8px rgba(0,0,0,0.12); }
+        header h2 { font-size: 1.3rem; font-weight: 400; opacity: 0.93; margin: 0; }
+        #ingreso { margin-top: 1rem; }
+        #ingreso a, .btn, button { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 1.15rem; border-radius: 999px; text-decoration: none; font-weight: 600; transition: all 0.25s ease; border: none; }
+        #ingreso a { background: #ffc107; color: #01315f; }
+        #ingreso a:hover, .btn:hover, button:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(1,49,95,0.12); }
+        nav { background: rgba(255,255,255,0.72); box-shadow: 0 8px 24px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 10; padding: 8px 0; margin-top: 1rem; border-top: 3px solid #ffc107; }
+        nav ul { list-style: none; padding: 0; margin: 0; text-align: center; }
+        nav ul li { display: inline-block; margin: 0 16px; }
+        nav ul li a { color: #01315f; font-weight: 600; text-decoration: none; padding: 0.8rem 0.5rem; transition: color 0.25s ease; }
+        nav ul li a:hover, nav ul li a.active { color: #1e5a96; }
+        main { padding: 2rem 1.5rem 3rem; max-width: 1100px; margin: 0 auto; }
+        main h2 { font-size: 2rem; color: #01315f; margin-bottom: 0.35rem; }
+        main p { line-height: 1.8; color: #4b5867; margin-bottom: 1rem; }
+        .card-panel { background: #ffffff; border: 1px solid #dbe4ef; border-radius: 1.25rem; box-shadow: 0 12px 28px rgba(5,30,70,0.08); padding: 1.75rem; margin-bottom: 1.75rem; }
+        .card-panel h3 { margin-top: 0; color: #01315f; margin-bottom: 1rem; }
+        .bus-table { width: 100%; border-collapse: collapse; border-radius: 1rem; overflow: hidden; }
+        .bus-table th, .bus-table td { padding: 1rem; border: 1px solid #e6ebf2; text-align: left; vertical-align: middle; }
+        .bus-table th { background: #01315f; color: #ffffff; letter-spacing: 0.03em; font-weight: 700; }
+        .bus-table tbody tr:nth-child(even) { background: #f9fbff; }
+        .bus-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .btn-secondary { background: #1e5a96; color: #ffffff; }
+        .btn-secondary:hover { background: #143f6e; }
+        .btn-danger { background: #dc3545; color: #ffffff; }
+        .btn-danger:hover { background: #b52a38; }
+        .form-card { display: grid; gap: 1rem; background: #f8fbff; border: 1px solid #dbe4ef; border-radius: 1.25rem; padding: 1.5rem; }
+        .form-card label { display: grid; gap: 0.45rem; color: #28303f; font-weight: 600; }
+        .form-card input, .form-card select { width: 100%; border: 1px solid #cfdce8; border-radius: 0.85rem; padding: 0.85rem 1rem; background: #ffffff; color: #1f2d3d; }
+        .form-card button { width: fit-content; margin-top: 0.5rem; padding: 0.85rem 1.2rem; border-radius: 999px; background: #01315f; color: #ffffff; }
+        .form-card button:hover { background: #0c2c5f; }
+        footer { text-align: center; padding: 1.2rem 1.5rem; color: #4b5867; font-size: 0.95rem; }
+        @media (max-width: 820px) {
+            nav ul li { display: block; margin: 0.35rem 0; }
+            .bus-actions { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img th:src="@{/images/Bus_palmera.png}" alt="Bus palmera" id="logo2">
+        <h1>Bustraker - Panel Admin</h1>
+        <h2>Actualizar Buses</h2>
+        <div id="ingreso">
+            <a id="Volver" th:href="@{/index_2}">Volver al Panel</a>
+        </div>
+    </header>
+    <nav>
+        <ul>
+            <li><a th:href="@{/index_2}">Panel Admin</a></li>
+            <li><a th:href="@{/registro-buses}">Registrar Buses</a></li>
+            <li><a th:href="@{/actualizarbuses}">Actualizar Buses</a></li>
+            <li><a th:href="@{/eliminarbuses}">Eliminar Buses</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h2>Actualizar Información de Buses</h2>
+        <p>Modifica los datos de los buses en circulación. Selecciona un registro para editar o eliminarlo directamente desde la lista.</p>
+
+        <section class="card-panel">
+            <h3>Listado de Buses</h3>
+            <div style="overflow-x:auto;">
+                <table class="bus-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Placa</th>
+                            <th>Modelo</th>
+                            <th>Ruta</th>
+                            <th style="width: 210px; text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="bus : ${buses}">
+                            <td th:text="${bus.id}">ID</td>
+                            <td th:text="${bus.placa}">ABC-123</td>
+                            <td th:text="${bus.modelo}">Modelo</td>
+                            <td th:text="${bus.rutaNombre != null ? bus.rutaNombre : 'Sin ruta'}">Sin ruta</td>
+                            <td>
+                                <div class="bus-actions">
+                                    <a th:href="@{/actualizar-bus/{id}(id=${bus.id})}" class="btn btn-secondary">Editar</a>
+                                    <a th:href="@{/eliminar-bus/{id}(id=${bus.id})}" class="btn btn-danger" onclick="return confirm('¿Eliminar este bus?')">Eliminar</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${buses == null or buses.size() == 0}">
+                            <td colspan="5" style="padding: 1.5rem; text-align: center; color: #5a6472;">No hay buses registrados aún.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section th:if="${bus}" class="card-panel form-card">
+            <h3>Editar Bus <span th:text="${bus.id}"></span></h3>
+            <form th:action="@{/actualizar-bus/{id}(id=${bus.id})}" method="post" th:object="${bus}">
+                <label>Placa:
+                    <input type="text" th:field="*{placa}" required />
+                </label>
+                <label>Modelo:
+                    <input type="text" th:field="*{modelo}" required />
+                </label>
+                <label>Ruta asignada:
+                    <select th:field="*{rutaId}">
+                        <option value="">-- Ninguna --</option>
+                        <option th:each="ruta : ${rutas}" th:value="${ruta.id}" th:text="${ruta.nombre}" th:selected="${ruta.id == bus.rutaId}"></option>
+                    </select>
+                </label>
+                <button type="submit">Actualizar</button>
+            </form>
+        </section>
+
+        <p><em>Nota: Los cambios en buses se reflejarán en el panel principal después de guardar.</em></p>
+    </main>
+    <footer id="pie">
+        <p>&copy; 2025 Bustraker. Todos los derechos reservados.</p>
+        <p>Panel de Administración</p>
+    </footer>
+</body>
+</html>

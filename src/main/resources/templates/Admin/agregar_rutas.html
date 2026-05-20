@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Gestión de rutas - Bustraker">
+    <meta name="theme-color" content="#01315f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Gestión de Rutas - Bustraker</title>
+    <link rel="stylesheet" th:href="@{/Css/style_agregar_rutas.css}">
+    <link rel="shortcut icon" th:href="@{/images/Bus_icono.png}" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-route"></i> Gestión de Rutas</h1>
+        <p>Administra las rutas de buses en Cartagena.</p>
+    </header>
+    <main>
+        <section id="formulario-agregar-ruta">
+            <h2>Agregar Nueva Ruta</h2>
+            <form th:action="@{/rutas}" method="post" th:object="${newRuta}">
+                <label for="nombre">Nombre de la Ruta:</label>
+                <input type="text" id="nombre" th:field="*{nombre}" placeholder="Ej. Avenida Express" required>
+                <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+
+                <label for="barrios">Barrios (separados por coma):</label>
+                <input type="text" id="barrios" name="barrios" placeholder="Ej. Zaragoza, Yolanda" required>
+                <span th:if="${#fields.hasErrors('barrios')}" th:errors="*{barrios}"></span>
+
+                <label for="horaAproximada">Hora Aproximada:</label>
+                <input type="time" id="horaAproximada" th:field="*{horaAproximada}">
+                <span th:if="${#fields.hasErrors('horaAproximada')}" th:errors="*{horaAproximada}"></span>
+
+                <button type="submit"><i class="fas fa-plus"></i> Agregar Ruta</button>
+            </form>
+        </section>
+
+        <section id="lista-rutas">
+            <h2><i class="fas fa-list"></i> Rutas Existentes</h2>
+            <ul th:if="${rutas}" th:each="ruta, iterStat : ${rutas}">
+                <li>
+                    <strong th:text="${ruta.nombre}"></strong> - Barrios: <span th:each="barrio : ${ruta.barrios}" th:text="${barrio} + ', '"></span>
+                    <span th:if="${horasFormateadas[iterStat.index] != ''}">| Hora: <span th:text="${horasFormateadas[iterStat.index]}"></span></span>
+                    <a th:href="@{/editar-ruta/{id}(id=${ruta.id})}"><i class="fas fa-edit"></i> Editar</a>
+                    <a th:href="@{/eliminar-ruta/{id}(id=${ruta.id})}" onclick="return confirm('¿Eliminar ruta?')"><i class="fas fa-trash"></i> Eliminar</a>
+                </li>
+            </ul>
+            <p th:if="${#lists.isEmpty(rutas)}">No hay rutas registradas.</p>
+        </section>
+    </main>
+    <footer>
+        <a th:href="@{/index_2}"><i class="fas fa-arrow-left"></i> Volver al Panel de Administración</a>
+    </footer>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>
