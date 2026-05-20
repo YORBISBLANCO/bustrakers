@@ -1,6 +1,6 @@
-FROM openjdk:17-jdk-slim
+FROM maven:3.9-eclipse-temurin-17
 WORKDIR /app
 COPY . .
-RUN ./mvnw package -DskipTests
+RUN mvn package -DskipTests
 EXPOSE 8080
 CMD ["java", "-jar", "target/*.jar"]
